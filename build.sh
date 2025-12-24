@@ -2,43 +2,39 @@
 # Script to build image for qemu.
 # Author: Siddhant Jajoo.
 
+set -e
+
 git submodule init
 git submodule sync
 git submodule update
 
-# local.conf won't exist until this step on first execution
+# Setup Yocto environment
 source poky/oe-init-build-env
 
-CONFLINE="MACHINE = \"qemuarm64\""
+# 🚨 CRITICAL: disable bitbake server BEFORE ANY bitbake command
+export BB_NO_SERVER=1
 
-cat conf/local.conf | grep "${CONFLINE}" > /dev/null
-local_conf_info=$?
-
-if [ $local_conf_info -ne 0 ];then
-	echo "Append ${CONFLINE} in the local.conf file"
-	echo ${CONFLINE} >> conf/local.conf
-	
-else
-	echo "${CONFLINE} already exists in the local.conf file"
-fi
-
-
-bitbake-layers show-layers | grep "meta-aesd" > /dev/null
-layer_info=$?
-
-if [ $layer_info -ne 0 ];then
-	echo "Adding meta-aesd layer"
-	bitbake-layers add-layer ../meta-aesd
-else
-	echo "meta-aesd layer already exists"
-fi
-
-set -e
-
-# Kill any stale bitbake server state (CI safety)
+# Kill stale server artifacts (CI safety)
 bitbake -m || true
 rm -f tmp/bitbake.lock tmp/bitbake.sock
 
-export BB_NO_SERVER=1
+CONFLINE='MACHINE = "qemuarm64"'
+
+if ! grep -q "${CONFLINE}" conf/local.conf; then
+    echo "Append ${CONFLINE} in the local.conf file"
+    echo ${CONFLINE} >> conf/local.conf
+else
+    echo "${CONFLINE} already exists in the local.conf file"
+fi
+
+# Safe now because BB_NO_SERVER=1 is already active
+if ! bitbake-layers show-layers | grep -q "meta-aesd"; then
+    echo "Adding meta-aesd layer"
+    bitbake-layers add-layer ../meta-aesd
+else
+    echo "meta-aesd layer already exists"
+fi
+
+# Build
 bitbake core-image-aesd
 
