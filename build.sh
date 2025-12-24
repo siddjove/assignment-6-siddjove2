@@ -34,4 +34,6 @@ else
 fi
 
 set -e
+export BB_NO_SERVER=1
 bitbake core-image-aesd
+
