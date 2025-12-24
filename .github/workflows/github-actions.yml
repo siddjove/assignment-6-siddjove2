@@ -1,45 +1,53 @@
-name: assignment-test
-on:
-    push:
-        tags-ignore:
-            - '*'
-        branches:
-            - '*'
-jobs:
-      full-test:
-        runs-on: self-hosted
-        steps:
-          - uses: actions/checkout@v3
-            with:
-              clean: false
-              submodules: 'recursive'
-          - uses: webfactory/ssh-agent@v0.5.4
-            with:
-                 ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          - name: Run build
-  timeout-minutes: 600
-  run: |
-     docker run --rm \
-       -e BB_NO_SERVER=1 \
-       -e LANG=C.UTF-8 \
-       -e LC_ALL=C.UTF-8 \
-       -v $SSH_AUTH_SOCK:/ssh-agent \
-       -e SSH_AUTH_SOCK=/ssh-agent \
-       -e GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" \
-       -v ${GITHUB_WORKSPACE}:${GITHUB_WORKSPACE} \
-       -w ${GITHUB_WORKSPACE} \
-       cuaesd/aesd-autotest:24-assignment6-yocto \
-       ./build.sh
+name: assignment-6-yocto
 
-          - name: Cleanup
-            if: always()
-            run: |
-              ssh-add -D
-          - name: Run full test
-            timeout-minutes: 15
-            run: |
-               docker run --rm \
-                 -v ${GITHUB_WORKSPACE}:${GITHUB_WORKSPACE} \
-                 cuaesd/aesd-autotest:assignment6-yocto \
-                 --workdir=${GITHUB_WORKSPACE} \
-                 ./full-test.sh
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  full-test:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          clean: false
+          submodules: recursive
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Run build
+        timeout-minutes: 600
+        run: |
+          docker run --rm \
+            -e BB_NO_SERVER=1 \
+            -e LANG=C.UTF-8 \
+            -e LC_ALL=C.UTF-8 \
+            -v $SSH_AUTH_SOCK:/ssh-agent \
+            -e SSH_AUTH_SOCK=/ssh-agent \
+            -e GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" \
+            -v ${{ github.workspace }}:${{ github.workspace }} \
+            -w ${{ github.workspace }} \
+            cuaesd/aesd-autotest:24-assignment6-yocto \
+            ./build.sh
+
+      - name: Cleanup SSH agent
+        if: always()
+        run: |
+          ssh-add -D
+
+      - name: Run full test
+        timeout-minutes: 15
+        run: |
+          docker run --rm \
+            -e BB_NO_SERVER=1 \
+            -v ${{ github.workspace }}:${{ github.workspace }} \
+            -w ${{ github.workspace }} \
+            cuaesd/aesd-autotest:assignment6-yocto \
+            ./full-test.sh
+
