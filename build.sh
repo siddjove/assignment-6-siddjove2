@@ -34,6 +34,11 @@ else
 fi
 
 set -e
+
+# Kill any stale bitbake server state (CI safety)
+bitbake -m || true
+rm -f tmp/bitbake.lock tmp/bitbake.sock
+
 export BB_NO_SERVER=1
 bitbake core-image-aesd
 
