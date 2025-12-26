@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 SRC_URI = "git://github.com/siddjove/assignments-3-and-later-siddjove2.git;protocol=ssh;branch=main \
            file://aesdsocket-start.sh"
 
-SRCREV = "e85eabb63d43ce3adf2c2fb96a078798d7ced113"
+SRCREV = "ef54bb34ec2d4f6634475f0a88d2161cd5851e33"
 
 # Build from server/ in that repo
 S = "${WORKDIR}/git/server"
