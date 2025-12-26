@@ -24,10 +24,9 @@ do_compile() {
 
 do_install() {
     install -d ${D}${bindir}
-    install -m 0755 aesdsocket ${D}${bindir}/aesdsocket
+    install -m 0755 ${S}/aesdsocket ${D}${bindir}/aesdsocket
 
     install -d ${D}${sysconfdir}/init.d
-    install -m 0755 ${WORKDIR}/aesdsocket-start.sh \
-        ${D}${sysconfdir}/init.d/aesdsocket-start.sh
+    install -m 0755 ${WORKDIR}/aesdsocket-start.sh ${D}${sysconfdir}/init.d/aesdsocket-start.sh
 }
 
