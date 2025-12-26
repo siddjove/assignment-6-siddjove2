@@ -1,3 +1,17 @@
 #!/bin/sh
-/usr/bin/aesdsocket -d
+
+case "$1" in
+  start)
+    /usr/bin/aesdsocket -d &
+    ;;
+  stop)
+    killall aesdsocket || true
+    ;;
+  restart)
+    killall aesdsocket || true
+    /usr/bin/aesdsocket -d &
+    ;;
+esac
+
+exit 0
 
