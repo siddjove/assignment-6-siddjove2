@@ -1,18 +1,26 @@
 #!/bin/sh
+### BEGIN INIT INFO
+# Provides:          aesdsocket
+# Required-Start:    $network
+# Required-Stop:     $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: AESD Socket Server
+### END INIT INFO
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/aesdsocket
 
 case "$1" in
   start)
     echo "Starting aesdsocket"
-    # avoid starting multiple copies
-    if pidof aesdsocket >/dev/null 2>&1; then
+    if pidof aesdsocket > /dev/null 2>&1; then
       echo "aesdsocket already running"
       exit 0
     fi
-    if [ -x /usr/bin/aesdsocket ]; then
-      /usr/bin/aesdsocket &
-      sleep 1
+
+    if [ -x "$DAEMON" ]; then
+      $DAEMON -d
       exit 0
     else
       echo "aesdsocket binary not found"
@@ -21,7 +29,10 @@ case "$1" in
     ;;
   stop)
     echo "Stopping aesdsocket"
-    killall aesdsocket 2>/dev/null || true
+    pid=$(pidof aesdsocket)
+    if [ -n "$pid" ]; then
+      kill "$pid"
+    fi
     ;;
   restart)
     $0 stop
@@ -35,3 +46,4 @@ case "$1" in
 esac
 
 exit 0
+

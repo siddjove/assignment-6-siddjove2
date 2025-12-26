@@ -5,22 +5,18 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 SRC_URI = "git://github.com/siddjove/assignments-3-and-later-siddjove2.git;protocol=ssh;branch=main \
            file://aesdsocket-start.sh"
 
-SRCREV = "ef54bb34ec2d4f6634475f0a88d2161cd5851e33"
+SRCREV = "b23e428cbb83ca4ac4cb8f24eaba0938cb113e7d"
 
-# Build from server/ in that repo
 S = "${WORKDIR}/git/server"
 
-# Link flags (use only if needed)
 TARGET_LDFLAGS += "-pthread"
 
-# Runtime deps (if any extra libs required, add them here)
-RDEPENDS_${PN} += "libgcc pthread"
+inherit update-rc.d
 
-# Initscript registration (update-rc.d)
 INITSCRIPT_NAME = "aesdsocket"
 INITSCRIPT_PARAMS = "defaults"
 
-FILES_${PN} += "${bindir}/aesdsocket ${sysconfdir}/init.d/aesdsocket"
+FILES:${PN} += "${bindir}/aesdsocket ${sysconfdir}/init.d/aesdsocket"
 
 do_configure () {
     :
@@ -31,11 +27,10 @@ do_compile () {
 }
 
 do_install () {
-    # Install binary
     install -d ${D}${bindir}
     install -m 0755 ${S}/aesdsocket ${D}${bindir}/aesdsocket
 
-    # Install init script
     install -d ${D}${sysconfdir}/init.d
     install -m 0755 ${WORKDIR}/aesdsocket-start.sh ${D}${sysconfdir}/init.d/aesdsocket
 }
+
